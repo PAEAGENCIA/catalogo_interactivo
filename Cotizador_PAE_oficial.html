@@ -1189,8 +1189,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <div class="trial-opts">
         <a class="t-opt" href="#cotizador" data-trial="uno">
           <span class="t-k">1 video</span>
-          <b>Video estratégico</b>
-          <span class="t-d">Un video humanizado con guion, grabación y edición.</span>
+          <b>Video humanizado</b>
+          <span class="t-d">Un video con guion, grabación y edición.</span>
           <span class="t-p num money" data-v="1250">$1,250</span>
         </a>
         <a class="t-opt" href="#cotizador" data-trial="tres">
@@ -1349,8 +1349,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <details><summary>¿Graban fuera de Puebla?</summary><p>Sí. Si tu negocio está fuera del estado de Puebla, vamos hasta allá con un costo adicional de $300 por visita de grabación. Puedes agregarlo en el cotizador.</p></details>
       <details><summary>¿Cuánto tiempo me va a quitar?</summary><p>Aprobar el calendario del mes y estar presente en la grabación. Del guion, la edición, las portadas y la publicación nos encargamos nosotros.</p></details>
       <details><summary>¿Puedo ver los videos antes de que se publiquen?</summary><p>Sí. Revisas cada video antes de publicarlo y tienes un ajuste por video incluido.</p></details>
-      <details><summary>¿Puedo tener más videos sin subir tanto mi inversión?</summary><p>Sí. A cualquier paquete, al video estratégico o al paquete de prueba puedes sumar videos de edición sencilla por $199 cada uno. Por separado cuestan $399, así que al sumarlos también ahorras.</p></details>
-      <details><summary>¿Qué es un video de edición sencilla?</summary><p>Es un video de una sola toma, con texto en pantalla y música. Es ligero y fácil de ver, ideal para mantener tu perfil activo entre tus videos estratégicos: una novedad, un producto del día, un momento de tu negocio. Aunque es sencillo, también lo planeamos, lo grabamos y lo editamos nosotros, para que se vea cuidado y vaya de acuerdo con tu marca.</p></details>
+      <details><summary>¿Puedo tener más videos sin subir tanto mi inversión?</summary><p>Sí. A cualquier paquete, al video humanizado o al paquete de prueba puedes sumar videos de edición sencilla por $199 cada uno. Por separado cuestan $399, así que al sumarlos también ahorras.</p></details>
+      <details><summary>¿Qué es un video de edición sencilla?</summary><p>Es un video de una sola toma, con texto en pantalla y música. Es ligero y fácil de ver, ideal para mantener tu perfil activo entre tus videos principales: una novedad, un producto del día, un momento de tu negocio. Aunque es sencillo, también lo planeamos, lo grabamos y lo editamos nosotros, para que se vea cuidado y vaya de acuerdo con tu marca.</p></details>
       <details><summary>¿Qué diferencia hay entre un video humanizado y uno profesional?</summary><p>El humanizado lleva a una persona hablando a cámara y construye confianza. El profesional muestra producto, lugar y detalles con voz en off y texto. Cada paquete combina los dos para que tu contenido sea cercano y constante.</p></details>
 
       <h4 class="faq-g">Publicación y resultados</h4>
@@ -1491,7 +1491,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     {id:'tres',n:'3 pagos',r:.03,d:'50% al arrancar, 25% el día de grabación y 25% en la tercera semana. +3% por pagar en partes.',sp:[[.5,'Al arrancar'],[.25,'El día de grabación'],[.25,'Tercera semana']],pkOnly:true}
   ];
   var OFF={
-    uno:{id:'uno',name:'Video estratégico',price:1250,mixes:[[1,0]],ex:['port','copy'],oneoff:true},
+    uno:{id:'uno',name:'Video humanizado',price:1250,mixes:[[1,0]],ex:['port','copy'],oneoff:true},
     tres:{id:'tres',name:'Paquete de prueba',price:2700,mixes:[[3,0],[2,2],[1,4],[0,6]],ex:['port','copy'],oneoff:true}
   };
   var MIXN=function(m){var a=[];if(m[0])a.push(m[0]+' humanizado'+(m[0]>1?'s':''));if(m[1])a.push(m[1]+' profesional'+(m[1]>1?'es':''));return a.join(' y ')};
@@ -1658,7 +1658,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     var V=k.v+(off?0:S.xh+S.xp),h='';
     if(!off)h+='<div class="ad"><div><b>Videos humanizados extra</b><small>'+fmt(M(H))+' cada uno · guion, grabación y edición</small></div>'+stepper('xh',S.xh,12,'Videos humanizados extra')+'</div>';
     if(!off)h+='<div class="ad"><div><b>Videos profesionales extra</b><small>'+fmt(M(P))+' cada uno · tomas, voz y edición</small></div>'+stepper('xp',S.xp,20,'Videos profesionales extra')+'</div>';
-    h+='<div class="ad"><div><b>Videos de edición sencilla</b><small>Para mantener tu perfil activo entre tus videos estratégicos. Una sola toma con texto y música, planeada, grabada y editada por nosotros · <span class="pr">'+fmt(M(SIMPLE))+' cada uno</span> <s>'+fmt(M(SIMPLE_LOOSE))+'</s></small></div>'+stepper('simple',S.simple,30,'Videos de edición sencilla')+'</div>';
+    h+='<div class="ad"><div><b>Videos de edición sencilla</b><small>Para mantener tu perfil activo entre tus videos principales. Una sola toma con texto y música, planeada, grabada y editada por nosotros · <span class="pr">'+fmt(M(SIMPLE))+' cada uno</span> <s>'+fmt(M(SIMPLE_LOOSE))+'</s></small></div>'+stepper('simple',S.simple,30,'Videos de edición sencilla')+'</div>';
     ORDER.forEach(function(e){
       var x=EX[e],inc=k.ex.indexOf(e)>-1,val=M(x.kind==='vid'?x.price*V:x.price);
       if(off&&x.kind!=='vid')return;
