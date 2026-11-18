@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRM de prospectos P.A.E.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: una sola columna en celular; barra de etapas arriba, "Hoy" primero, luego la lista. Panel de detalle que sube desde abajo. */
+:root{
+  --ink:#0b0b0d; --paper:#f7f7f5; --card:#ffffff; --line:#e3e3df; --muted:#66666c;
+  --accent:#2a47e6; --accent-soft:#e8ecff; --warn:#b45309; --warn-soft:#fff3e0; --ok:#15803d; --ok-soft:#e6f6ec; --bad:#b42318; --bad-soft:#fdecea;
+  --display:"Lora", Georgia, serif; --body:"Manrope", "Helvetica Neue", Arial, sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --ink:#f2f2f0; --paper:#111113; --card:#1a1a1d; --line:#2c2c31; --muted:#a2a2aa;
+  --accent:#7d93ff; --accent-soft:#1f2550; --warn:#f0a85a; --warn-soft:#3a2a14; --ok:#5fd28b; --ok-soft:#14301f; --bad:#ff8a80; --bad-soft:#3a1715; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --ink:#f2f2f0; --paper:#111113; --card:#1a1a1d; --line:#2c2c31; --muted:#a2a2aa;
+  --accent:#7d93ff; --accent-soft:#1f2550; --warn:#f0a85a; --warn-soft:#3a2a14; --ok:#5fd28b; --ok-soft:#14301f; --bad:#ff8a80; --bad-soft:#3a1715; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:880px;margin:0 auto;padding:18px 16px 80px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:12px}
+.brand{font-family:var(--display);font-weight:700;font-size:24px;line-height:1}
+.brand small{display:block;font-family:var(--body);font-weight:500;font-size:10px;letter-spacing:.18em;color:var(--muted);margin-top:6px}
+h1{font-family:var(--display);font-size:22px;margin:18px 0 4px;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px;margin:0}
+.btn{border:1.5px solid var(--ink);background:var(--card);border-radius:999px;padding:8px 14px;font-weight:600;font-size:13px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--accent-soft)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{border-color:var(--line)}
+.btn:focus-visible,.chip:focus-visible,.row:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.stages{display:flex;gap:8px;overflow-x:auto;padding:14px 0 4px;scrollbar-width:none}
+.chip{flex:0 0 auto;border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:8px 12px;cursor:pointer;text-align:left;min-width:92px}
+.chip b{display:block;font-size:20px;font-variant-numeric:tabular-nums;line-height:1.1}
+.chip span{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.02em}
+.chip.on{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.chip.on span{color:var(--paper);opacity:.8}
+.section{margin-top:22px}
+.section h2{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:0 0 8px;font-weight:700}
+.list{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:6px 1fr auto;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 12px 12px 0;cursor:pointer}
+.row .stripe{align-self:stretch;border-radius:0 4px 4px 0}
+.row .who{min-width:0}
+.row .neg{font-weight:700;font-size:15px}
+.row .meta{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.pill{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.due{font-size:11.5px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.due.late{color:var(--bad)} .due.today{color:var(--warn)}
+.empty{border:1.5px dashed var(--line);border-radius:12px;padding:16px;color:var(--muted);font-size:13.5px;background:transparent}
+.status{margin-top:12px;font-size:13px;padding:10px 12px;border-radius:10px;background:var(--warn-soft);color:var(--warn);display:none}
+.status.show{display:block}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.search{flex:1 1 200px;border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;background:var(--card)}
+/* panel */
+.veil{position:fixed;inset:0;background:rgba(10,10,14,.45);display:none;align-items:flex-end;justify-content:center;z-index:10}
+.veil.show{display:flex}
+.panel{background:var(--paper);width:100%;max-width:640px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;padding:18px 16px 28px;border-top:3px solid var(--accent)}
+@media (min-width:700px){.veil{align-items:center}.panel{border-radius:18px;max-height:88%}}
+.panel h3{font-family:var(--display);font-size:22px;margin:0;text-wrap:balance}
+.panel .top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.x{border:none;background:none;font-size:22px;cursor:pointer;line-height:1;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:420px){.grid2{grid-template-columns:1fr}}
+label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);margin:12px 0 4px;letter-spacing:.03em}
+input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;background:var(--card)}
+textarea{min-height:96px;resize:vertical}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.msgbox{margin-top:14px;background:var(--card);border:1.5px solid var(--accent);border-radius:14px;padding:12px}
+.msgbox .hint{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+.attach{margin-top:8px;font-size:12.5px;background:var(--accent-soft);color:var(--accent);padding:8px 10px;border-radius:8px;font-weight:600}
+.hist{margin-top:16px;border-top:1px solid var(--line);padding-top:10px}
+.hist ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.hist li{font-size:13px;display:grid;grid-template-columns:86px 1fr;gap:8px}
+.hist time{color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px}
+.tabs{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.tabs .btn{padding:6px 12px}
+.tabs .btn.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.foot{margin-top:28px;font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.panel{animation:up .18s ease-out}@keyframes up{from{transform:translateY(16px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">P.A.E<small>PLATAFORMA DE ASISTENCIA A EMPRENDEDORES</small></div>
+    <button class="btn primary" id="btnNew" type="button">+ Prospecto</button>
+  </header>
+  <h1>Prospectos y seguimiento</h1>
+  <p class="sub" id="summary">Cargando prospectos…</p>
+  <div class="status" id="status" role="status"></div>
+
+  <div class="stages" id="stages" role="tablist" aria-label="Filtrar por etapa"></div>
+
+  <div class="section" id="todaySec">
+    <h2>Para hoy</h2>
+    <div class="list" id="today"></div>
+  </div>
+
+  <div class="section">
+    <h2 id="listTitle">Todos los prospectos</h2>
+    <div class="toolbar">
+      <input class="search" id="q" type="search" placeholder="Buscar negocio o nombre" aria-label="Buscar">
+      <button class="btn ghost" id="btnTpl" type="button">Mensajes</button>
+    </div>
+    <div class="list" id="list" style="margin-top:10px"></div>
+  </div>
+  <p class="foot">Los botones de WhatsApp abren el chat con el mensaje escrito. El PDF de la propuesta se adjunta a mano en WhatsApp.</p>
+</div>
+
+<div class="veil" id="veil"><div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="pTitle"></div></div>
+
+<script>
+/* ===== CONFIGURACIÓN: pega aquí la URL de tu Apps Script y el mismo token que pusiste en Codigo.gs ===== */
+const API_URL = 'PEGA_AQUI_LA_URL_DE_TU_APPS_SCRIPT';
+const TOKEN = 'PAE-CRM-2026';
+/* ======================================================================================================= */
+const STAGES = [
+  {id:'sin', label:'Sin propuesta', c:'--muted', bg:'--line'},
+  {id:'por', label:'Por enviar', c:'--accent', bg:'--accent-soft'},
+  {id:'env', label:'Enviada', c:'--warn', bg:'--warn-soft'},
+  {id:'seg', label:'En seguimiento', c:'--warn', bg:'--warn-soft'},
+  {id:'cita', label:'Cita agendada', c:'--accent', bg:'--accent-soft'},
+  {id:'cer', label:'Cerrado', c:'--ok', bg:'--ok-soft'},
+  {id:'per', label:'Perdido', c:'--bad', bg:'--bad-soft'}
+];
+const SMAP = Object.fromEntries(STAGES.map(s=>[s.id,s]));
+const DEFAULT_TPL = {
+  propuesta:'Hola {nombre}, ¿cómo estás? Soy Raúl Sánchez, de P.A.E. Te comparto la propuesta que armamos para {negocio}, con las ideas de video del primer mes y los paquetes. Me gustaría platicarla contigo en 30 minutos. ¿Qué día de esta semana te queda?',
+  seguimiento1:'Hola {nombre}, ¿alcanzaste a revisar la propuesta de {negocio}? Me gustaría saber cuál de las ideas te llamó más la atención.',
+  seguimiento2:'Hola {nombre}, sé que la semana se va rápido. Si te sirve, te explico la propuesta en 15 minutos por llamada. ¿Te queda hoy o mañana?',
+  cita:'Hola {nombre}, te confirmo nuestra reunión del {fecha}. Llevo las ideas para {negocio} para revisarlas juntos.'
+};
+const TPL_NAMES = {propuesta:'Enviar propuesta', seguimiento1:'Seguimiento 1', seguimiento2:'Seguimiento 2', cita:'Confirmar cita'};
+let prospects=[], tpl={...DEFAULT_TPL}, filter='all', query='', readOnly=false, loaded=false;
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function today(){return new Date().toLocaleDateString('en-CA',{timeZone:'America/Mexico_City'});}
+function addDays(n){const d=new Date(today()+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+function fmt(d){if(!d)return '';const [y,m,dd]=d.split('-');const ms=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];return `${+dd} ${ms[+m-1]}`;}
+function digits(t){let d=String(t||'').replace(/\D/g,'');if(d.length===10)d='52'+d;if(d.length===13&&d.startsWith('521'))d='52'+d.slice(3);return d;}
+function firstName(p){const n=(p.prospecto||'').trim();if(!n||/^sin nombre/i.test(n))return '';return n.split(/\s+/)[0];}
+function fill(t,p,extra={}){return t.replace(/\{nombre\}/g,firstName(p)).replace(/\{negocio\}/g,p.negocio||'').replace(/\{fecha\}/g,extra.fecha||'').replace(/Hola ,/g,'Hola,').replace(/\s+,/g,',');}
+function waLink(p,text){return `https://wa.me/${digits(p.telefono)}?text=${encodeURIComponent(text)}`;}
+function dueState(p){if(!p.proxSeguimiento||['cer','per','sin'].includes(p.etapa))return '';const t=today();if(p.proxSeguimiento<t)return 'late';if(p.proxSeguimiento===t)return 'today';return '';}
+function status(msg){const s=$('#status');s.textContent=msg||'';s.classList.toggle('show',!!msg);}
+
+function render(){
+  const counts=Object.fromEntries(STAGES.map(s=>[s.id,0]));
+  prospects.forEach(p=>{counts[p.etapa]=(counts[p.etapa]||0)+1;});
+  const active=prospects.filter(p=>!['cer','per'].includes(p.etapa)).length;
+  const dueN=prospects.filter(p=>dueState(p)).length;
+  $('#summary').textContent=loaded?`${prospects.length} prospectos · ${active} activos · ${dueN} seguimientos para hoy o atrasados`:'Cargando prospectos…';
+  $('#stages').innerHTML=`<button class="chip ${filter==='all'?'on':''}" data-f="all" role="tab" aria-selected="${filter==='all'}"><b>${prospects.length}</b><span>Todos</span></button>`+
+    STAGES.map(s=>`<button class="chip ${filter===s.id?'on':''}" data-f="${s.id}" role="tab" aria-selected="${filter===s.id}"><b>${counts[s.id]||0}</b><span>${s.label}</span></button>`).join('');
+  const todayList=prospects.filter(p=>p.etapa==='por'||dueState(p)).sort((a,b)=>(a.proxSeguimiento||'0').localeCompare(b.proxSeguimiento||'0'));
+  $('#today').innerHTML=todayList.length?todayList.map(rowHTML).join(''):`<div class="empty">Nada pendiente para hoy. Los seguimientos aparecen aquí el día que toca.</div>`;
+  let list=prospects.filter(p=>filter==='all'||p.etapa===filter);
+  if(query){const q=query.toLowerCase();list=list.filter(p=>(p.negocio+' '+p.prospecto+' '+p.giro).toLowerCase().includes(q));}
+  const order=STAGES.map(s=>s.id);
+  list.sort((a,b)=>order.indexOf(a.etapa)-order.indexOf(b.etapa)||(a.negocio||'').localeCompare(b.negocio||''));
+  $('#listTitle').textContent=filter==='all'?'Todos los prospectos':SMAP[filter].label;
+  $('#list').innerHTML=list.length?list.map(rowHTML).join(''):`<div class="empty">${loaded?'No hay prospectos en esta etapa.':'Cargando…'}</div>`;
+}
+function rowHTML(p){
+  const s=SMAP[p.etapa]||STAGES[1]; const d=dueState(p);
+  const dueTxt=p.proxSeguimiento&&!['cer','per','sin'].includes(p.etapa)?`<span class="due ${d}">${d==='late'?'Atrasado · ':d==='today'?'Hoy · ':'Sigue '}${fmt(p.proxSeguimiento)}</span>`:'';
+  return `<div class="row" tabindex="0" data-id="${esc(p.id)}"><span class="stripe" style="background:var(${s.c})"></span>
+  <div class="who"><div class="neg">${esc(p.negocio)}</div><div class="meta">${esc(p.prospecto)} · ${esc(p.telefono)}</div></div>
+  <div class="right"><span class="pill" style="background:var(${s.bg});color:var(${s.c})">${s.label}</span>${dueTxt}</div></div>`;
+}
+
+/* ---------- panel ---------- */
+let cur=null, curTpl=null;
+function openPanel(p){cur=p?{...p}:{id:null,negocio:'',prospecto:'',telefono:'',giro:'',etapa:'por',proxSeguimiento:'',notas:'',propuesta:'',historial:[]};curTpl=null;drawPanel();$('#veil').classList.add('show');setTimeout(()=>{const f=$('#panel input');f&&!p&&f.focus();},50);}
+function closePanel(){$('#veil').classList.remove('show');cur=null;}
+function drawPanel(){
+  const p=cur; const isNew=!p.id;
+  const tplBtns=Object.keys(TPL_NAMES).map(k=>`<button class="btn ${curTpl===k?'on':'ghost'}" data-tpl="${k}" type="button">${TPL_NAMES[k]}</button>`).join('');
+  let msg='';
+  if(curTpl&&!isNew){
+    const fecha=curTpl==='cita'?($('#citaFecha')?.value||''):'';
+    const text=fill(tpl[curTpl],p,{fecha:fecha?fmtLong(fecha):'{fecha}'});
+    msg=`<div class="msgbox"><label for="msgText" style="margin-top:0">Mensaje · ${TPL_NAMES[curTpl]}</label>
+    ${curTpl==='cita'?`<label for="citaFecha">Fecha y hora de la reunión</label><input id="citaFecha" type="datetime-local" value="${esc(p._cita||'')}">`:''}
+    <textarea id="msgText">${esc(text)}</textarea>
+    ${curTpl==='propuesta'&&p.propuesta?`<div class="attach">Adjunta en WhatsApp: ${esc(p.propuesta)}</div>`:''}
+    <div class="actions"><a class="btn primary" id="sendWa" href="${esc(waLink(p,text))}" target="_blank" rel="noopener">Abrir WhatsApp</a></div>
+    <p class="hint">Al abrir WhatsApp se registra el envío y se agenda el siguiente seguimiento.</p></div>`;
+  }
+  $('#panel').innerHTML=`<div class="top"><h3 id="pTitle">${isNew?'Nuevo prospecto':esc(p.negocio)}</h3><button class="x" id="pClose" aria-label="Cerrar" type="button">×</button></div>
+  ${!isNew?`<div class="tabs" aria-label="Mensajes de WhatsApp">${tplBtns}</div>${msg}`:''}
+  <div class="grid2">
+    <div><label for="fNeg">Negocio</label><input id="fNeg" value="${esc(p.negocio)}"></div>
+    <div><label for="fPro">Prospecto</label><input id="fPro" value="${esc(p.prospecto)}"></div>
+    <div><label for="fTel">Teléfono (WhatsApp)</label><input id="fTel" inputmode="tel" value="${esc(p.telefono)}"></div>
+    <div><label for="fEta">Etapa</label><select id="fEta">${STAGES.map(s=>`<option value="${s.id}" ${p.etapa===s.id?'selected':''}>${s.label}</option>`).join('')}</select></div>
+    <div><label for="fSeg">Próximo seguimiento</label><input id="fSeg" type="date" value="${esc(p.proxSeguimiento)}"></div>
+    <div><label for="fPdf">Archivo de la propuesta</label><input id="fPdf" value="${esc(p.propuesta)}"></div>
+  </div>
+  <label for="fGiro">Giro</label><input id="fGiro" value="${esc(p.giro)}">
+  <label for="fNotas">Notas</label><textarea id="fNotas">${esc(p.notas)}</textarea>
+  <div class="actions"><button class="btn primary" id="pSave" type="button">${isNew?'Agregar prospecto':'Guardar cambios'}</button>
+  ${!isNew?`<button class="btn ghost" id="pDel" type="button">Eliminar</button>`:''}</div>
+  <p class="hint" id="pErr" style="color:var(--bad);font-size:13px"></p>
+  ${!isNew&&(p.historial||[]).length?`<div class="hist"><label style="margin-top:0">Historial</label><ol>${[...p.historial].reverse().map(h=>`<li><time>${esc(fmt(h.fecha))}</time><span>${esc(h.texto)}</span></li>`).join('')}</ol></div>`:''}`;
+}
+function fmtLong(v){if(!v)return '';const d=new Date(v);if(isNaN(d))return v;return d.toLocaleString('es-MX',{weekday:'long',day:'numeric',month:'long',hour:'numeric',minute:'2-digit'});}
+function readForm(){return {negocio:$('#fNeg').value.trim(),prospecto:$('#fPro').value.trim(),telefono:$('#fTel').value.trim(),etapa:$('#fEta').value,proxSeguimiento:$('#fSeg').value,propuesta:$('#fPdf').value.trim(),giro:$('#fGiro').value.trim(),notas:$('#fNotas').value};}
+
+async function api(action,data){
+  const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:TOKEN,action,data})});
+  const j=await r.json(); if(!j.ok) throw new Error(j.error||'Error'); return j;
+}
+async function load(){
+  try{
+    const r=await fetch(API_URL+'?action=list&token='+encodeURIComponent(TOKEN)); const j=await r.json();
+    if(!j.ok) throw new Error(j.error);
+    prospects=j.prospectos||[]; tpl={...DEFAULT_TPL,...(j.plantillas||{})}; loaded=true; status(''); render();
+  }catch(e){ loaded=true; status('No se pudieron cargar los prospectos. Revisa la URL del Apps Script y tu conexión.'); render(); }
+}
+async function save(p,patch,logText){
+  const body={...p,...patch,actualizado:new Date().toISOString()};
+  delete body._cita;
+  if(logText){body.historial=[...(p.historial||[]),{fecha:today(),texto:logText}];}
+  if(!body.id){body.id='p'+Date.now().toString(36);body.creado=new Date().toISOString();}
+  const i=prospects.findIndex(x=>x.id===body.id); if(i>=0)prospects[i]=body; else prospects.push(body); render();
+  try{ await api('save',body); return true; }
+  catch(e){ status('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'); load(); return false; }
+}
+document.addEventListener('click',async ev=>{
+  const chip=ev.target.closest('.chip'); if(chip){filter=chip.dataset.f;render();return;}
+  const row=ev.target.closest('.row'); if(row){const p=prospects.find(x=>x.id===row.dataset.id);p&&openPanel(p);return;}
+  if(ev.target.id==='btnNew'){openPanel(null);return;}
+  if(ev.target.id==='btnTpl'){openTpl();return;}
+  if(ev.target.id==='pClose'||ev.target.id==='veil'){closePanel();return;}
+  const tb=ev.target.closest('[data-tpl]'); if(tb&&cur){Object.assign(cur,readForm());curTpl=tb.dataset.tpl;drawPanel();return;}
+  if(ev.target.id==='pSave'&&cur){
+    const f=readForm(); if(!f.negocio){$('#pErr').textContent='Escribe el nombre del negocio.';return;}
+    if(f.telefono&&digits(f.telefono).length<12){$('#pErr').textContent='El teléfono necesita 10 dígitos.';return;}
+    const isNew=!cur.id; const changedStage=!isNew&&f.etapa!==cur.etapa;
+    const ok=await save(cur,f,isNew?'Prospecto agregado':changedStage?`Etapa: ${SMAP[f.etapa].label}`:null);
+    if(ok)closePanel(); return;
+  }
+  if(ev.target.id==='pDel'&&cur){
+    if(ev.target.dataset.sure!=='1'){ev.target.dataset.sure='1';ev.target.textContent='Toca otra vez para eliminar';return;}
+    const id=cur.id;prospects=prospects.filter(x=>x.id!==id);closePanel();render();try{await api('delete',{id});}catch(e){status('No se pudo eliminar.');load();}
+    return;
+  }
+  if(ev.target.id==='sendWa'&&cur){
+    const text=$('#msgText').value; ev.target.href=waLink(cur,text);
+    const f=readForm(); const k=curTpl; let patch={...f}, log='';
+    if(k==='propuesta'){patch.etapa='env';patch.proxSeguimiento=addDays(3);log='Propuesta enviada por WhatsApp';}
+    else if(k==='seguimiento1'){patch.etapa='seg';patch.proxSeguimiento=addDays(4);log='Seguimiento 1 enviado';}
+    else if(k==='seguimiento2'){patch.etapa='seg';patch.proxSeguimiento=addDays(7);log='Seguimiento 2 enviado';}
+    else if(k==='cita'){const c=$('#citaFecha').value;patch.etapa='cita';patch.proxSeguimiento=c?c.slice(0,10):f.proxSeguimiento;log='Cita confirmada'+(c?': '+fmtLong(c):'');}
+    save(cur,patch,log).then(ok=>{if(ok)closePanel();});
+  }
+  if(ev.target.id==='tSave'){
+    const nt={};Object.keys(DEFAULT_TPL).forEach(k=>nt[k]=$('#t_'+k).value);
+    tpl={...nt};closePanel();try{await api('saveTpl',nt);}catch(e){status('No se pudieron guardar los mensajes.');}
+  }
+  if(ev.target.id==='tReset'){Object.keys(DEFAULT_TPL).forEach(k=>$('#t_'+k).value=DEFAULT_TPL[k]);}
+});
+document.addEventListener('input',ev=>{
+  if(ev.target.id==='q'){query=ev.target.value;render();}
+  if(ev.target.id==='msgText'&&cur){$('#sendWa').href=waLink(cur,ev.target.value);}
+  if(ev.target.id==='citaFecha'&&cur){cur._cita=ev.target.value;const t=fill(tpl.cita,cur,{fecha:fmtLong(ev.target.value)});$('#msgText').value=t;$('#sendWa').href=waLink(cur,t);}
+});
+document.addEventListener('keydown',ev=>{
+  if(ev.key==='Escape')closePanel();
+  if(ev.key==='Enter'&&ev.target.classList&&ev.target.classList.contains('row'))ev.target.click();
+});
+$('#veil').addEventListener('click',ev=>{if(ev.target.id==='veil')closePanel();});
+
+function openTpl(){
+  cur=null;
+  $('#panel').innerHTML=`<div class="top"><h3 id="pTitle">Mensajes de WhatsApp</h3><button class="x" id="pClose" aria-label="Cerrar" type="button">×</button></div>
+  <p class="sub" style="margin-top:6px">Usa {nombre}, {negocio} y {fecha}; se llenan solos con los datos de cada prospecto.</p>
+  ${Object.keys(DEFAULT_TPL).map(k=>`<label for="t_${k}">${TPL_NAMES[k]}</label><textarea id="t_${k}">${esc(tpl[k])}</textarea>`).join('')}
+  <div class="actions"><button class="btn primary" id="tSave" type="button">Guardar mensajes</button><button class="btn ghost" id="tReset" type="button">Volver a los originales</button></div>`;
+  $('#veil').classList.add('show');
+}
+
+render();
+if(API_URL.startsWith('PEGA')){loaded=true;status('Falta configurar: pega la URL de tu Apps Script en API_URL, dentro de este archivo.');render();}
+else{load();setInterval(load,60000);}
+</script>
+</body>
+</html>
